@@ -31,10 +31,6 @@
           <el-icon><Lock /></el-icon>
           <template #title>国密加解密工具</template>
         </el-menu-item>
-        <el-menu-item index="/agent">
-          <el-icon><ChatDotRound /></el-icon>
-          <template #title>智能问答助手 (AI)</template>
-        </el-menu-item>
       </el-sub-menu>
 
       <template v-for="item in menuList" :key="item.id">
@@ -70,7 +66,7 @@ import { useAppStore } from '@/stores/app';
 import { getMenuTreeApi } from '@/api/modules/authApi';
 import type { SysMenuVO } from '@/api/types/userModel';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-import { Platform, Odometer, Document, Tools, Lock, ChatDotRound } from '@element-plus/icons-vue';
+import { Platform, Odometer, Document, Tools, Lock } from '@element-plus/icons-vue';
 import { registerDynamicRoutes } from '@/router/dynamicRoutes';
 
 const route = useRoute();
