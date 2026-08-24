@@ -1,0 +1,9 @@
+allowBuilds:
+  esbuild: true
+
+allowedDeprecatedVersions:
+  resolve-url: "*"
+  source-map-resolve: "*"
+  source-map-url: "*"
+  stable: "*"
+  urix: "*"
