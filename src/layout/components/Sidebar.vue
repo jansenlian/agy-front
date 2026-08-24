@@ -17,6 +17,22 @@
         <template #title>控制台</template>
       </el-menu-item>
 
+      <!-- AI 智能体中心 -->
+      <el-sub-menu index="/agents">
+        <template #title>
+          <el-icon><ChatDotRound /></el-icon>
+          <span>AI 智能体矩阵</span>
+        </template>
+        <el-menu-item index="/aks-agent">
+          <el-icon><DataAnalysis /></el-icon>
+          <template #title>阿克苏耕地监管智能体</template>
+        </el-menu-item>
+        <el-menu-item index="/agent">
+          <el-icon><User /></el-icon>
+          <template #title>人事运维问答智能体</template>
+        </el-menu-item>
+      </el-sub-menu>
+
       <!-- 专属空间与工程工具 -->
       <el-sub-menu index="/tools">
         <template #title>
@@ -66,7 +82,7 @@ import { useAppStore } from '@/stores/app';
 import { getMenuTreeApi } from '@/api/modules/authApi';
 import type { SysMenuVO } from '@/api/types/userModel';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-import { Platform, Odometer, Document, Tools, Lock } from '@element-plus/icons-vue';
+import { Platform, Odometer, Document, Tools, Lock, ChatDotRound, DataAnalysis, User } from '@element-plus/icons-vue';
 import { registerDynamicRoutes } from '@/router/dynamicRoutes';
 
 const route = useRoute();

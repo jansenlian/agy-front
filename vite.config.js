@@ -40,6 +40,11 @@ export default defineConfig({
         strictPort: true,
         host: true,
         proxy: {
+            '/api/aks/agent': {
+                target: 'http://127.0.0.1:8092',
+                changeOrigin: true,
+                rewrite: function (path) { return path.replace(/^\/api\/aks\/agent/, '/api/agent'); },
+            },
             '/api/agent': {
                 target: 'http://127.0.0.1:8090',
                 changeOrigin: true,

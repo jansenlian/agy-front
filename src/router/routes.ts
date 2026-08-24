@@ -30,7 +30,13 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: 'agent',
         name: 'AgentChat',
         component: () => import('@/views/agent/index.vue'),
-        meta: { title: '智能问答助手', icon: 'ChatDotRound' },
+        meta: { title: '人事运维智能体', icon: 'ChatDotRound' },
+      },
+      {
+        path: 'aks-agent',
+        name: 'AksAgentChat',
+        component: () => import('@/views/aks-agent/index.vue'),
+        meta: { title: '阿克苏智慧耕地智能体', icon: 'DataAnalysis' },
       },
       {
         path: 'crypto',
