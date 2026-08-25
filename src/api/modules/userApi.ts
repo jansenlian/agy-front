@@ -1,15 +1,24 @@
 import request from '../../utils/request';
-import type { SysUserVO, PageResultVO, SysLoginLogVO } from '../types/userModel';
+import type {
+  SysUserVO,
+  PageResultVO,
+  SysLoginLogVO,
+  SysUserQueryDTO,
+  SysUserFormDTO,
+  UserPasswordChangeDTO,
+  UserPasswordResetDTO,
+  SysLoginLogQueryDTO,
+} from '../types/userModel';
 
-export function getUserPageApi(params: any) {
+export function getUserPageApi(params?: SysUserQueryDTO) {
   return request.get<any, PageResultVO<SysUserVO>>('/users', { params });
 }
 
-export function createUserApi(data: any) {
+export function createUserApi(data: SysUserFormDTO) {
   return request.post<any, void>('/users', data);
 }
 
-export function updateUserApi(data: any) {
+export function updateUserApi(data: SysUserFormDTO) {
   return request.put<any, void>('/users', data);
 }
 
@@ -18,26 +27,27 @@ export function deleteUserApi(id: string | number) {
 }
 
 export function resetUserPasswordApi(id: string | number, password?: string) {
-  return request.put<any, void>(`/users/${id}/password`, { password });
+  const data: UserPasswordResetDTO = { password };
+  return request.put<any, void>(`/users/${id}/password`, data);
 }
 
 export function getUserRoleIdsApi(userId: string | number) {
-  return request.get<any, string[]>(`/users/${userId}/roles`);
+  return request.get<any, (string | number)[]>(`/users/${userId}/roles`);
 }
 
 export function saveUserRolesApi(userId: string | number, roleIds: (string | number)[]) {
   return request.post<any, void>(`/users/${userId}/roles`, roleIds);
 }
 
-export function updateUserPasswordApi(data: { oldPassword?: string; newPassword?: string }) {
+export function updateUserPasswordApi(data: UserPasswordChangeDTO) {
   return request.put<any, void>('/users/change-password', data);
 }
 
-export function exportUserApi(params?: any) {
+export function exportUserApi(params?: SysUserQueryDTO) {
   return request.get('/users/export', { params, responseType: 'blob' });
 }
 
-export function getLoginLogPageApi(params: any) {
+export function getLoginLogPageApi(params?: SysLoginLogQueryDTO) {
   return request.get<any, PageResultVO<SysLoginLogVO>>('/logs/login', { params });
 }
 

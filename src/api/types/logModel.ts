@@ -1,5 +1,5 @@
 export interface SysOperLogVO {
-  id: string;
+  id: string | number;
   title: string;
   businessType: number; // 0-其它 1-新增 2-修改 3-删除 4-授权 5-导出
   method: string;
@@ -13,4 +13,13 @@ export interface SysOperLogVO {
   status: number; // 1-成功 0-失败
   errorMsg?: string;
   operTime: string;
+}
+
+export interface SysOperLogQueryDTO {
+  pageNo?: number;
+  pageSize?: number;
+  title?: string;
+  operName?: string;
+  businessType?: number;
+  status?: number;
 }

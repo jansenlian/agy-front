@@ -168,7 +168,7 @@ const roleLoading = ref(false);
 const roleSubmitting = ref(false);
 const currentUser = ref<SysUserVO | null>(null);
 const allRoles = ref<SysRoleVO[]>([]);
-const selectedRoleIds = ref<string[]>([]);
+const selectedRoleIds = ref<(string | number)[]>([]);
 
 const queryForm = reactive({
   pageNo: 1,

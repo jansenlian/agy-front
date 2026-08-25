@@ -1,8 +1,8 @@
 import request from '../../utils/request';
-import type { SysOperLogVO } from '../types/logModel';
+import type { SysOperLogVO, SysOperLogQueryDTO } from '../types/logModel';
 import type { PageResultVO } from '../types/userModel';
 
-export function getOperLogPageApi(params: any) {
+export function getOperLogPageApi(params?: SysOperLogQueryDTO) {
   return request.get<any, PageResultVO<SysOperLogVO>>('/logs/oper', { params });
 }
 
