@@ -10,6 +10,7 @@ export const useUserStore = defineStore(
     const token = ref<string>('');
     const refreshToken = ref<string>('');
     const userInfo = ref<SysUserVO | null>(null);
+    // 权限标识与菜单树保持内存态 (避免 localStorage 持久化陈旧快照，每次启动/刷新由路由守卫拉取最新 RBAC)
     const permissions = ref<string[]>([]);
     const menuTree = ref<SysMenuVO[]>([]);
 
@@ -87,7 +88,8 @@ export const useUserStore = defineStore(
   },
   {
     persist: {
-      pick: ['token', 'refreshToken', 'userInfo', 'permissions', 'menuTree'],
+      // 仅持久化身份凭据与基本信息；权限与菜单树存内存，防止权限变更后客户端快照陈旧
+      pick: ['token', 'refreshToken', 'userInfo'],
     },
   }
 );

@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { useUserStore } from '../stores/user';
+import router from '../router';
 
 // 创建 Axios 实例
 const service: AxiosInstance = axios.create({
@@ -12,6 +13,28 @@ const service: AxiosInstance = axios.create({
 let isRefreshing = false;
 // 等待新 Token 换回后重放的请求队列
 let retryRequestsQueue: Array<(token: string) => void> = [];
+
+/**
+ * 统一会话失效跳转登录处理 (避免强制 location.href 硬重载与路径割裂，保留 redirect 现场)
+ */
+function redirectToLogin(message?: string) {
+  const userStore = useUserStore();
+  userStore.resetToken();
+  if (message) {
+    ElMessage.warning(message);
+  }
+  const currentRoute = router.currentRoute.value;
+  if (currentRoute && currentRoute.path !== '/login') {
+    const redirect = currentRoute.fullPath && currentRoute.fullPath !== '/' ? currentRoute.fullPath : undefined;
+    router.push({
+      path: '/login',
+      query: redirect ? { redirect } : undefined,
+    }).catch(() => {
+      // 容错降级
+      window.location.href = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login';
+    });
+  }
+}
 
 // 请求拦截器：注入链路追踪 ID (X-Trace-Id)、32位 UUID Token 以及当前登录的用户 ID (X-User-Id)
 service.interceptors.request.use(
@@ -67,8 +90,7 @@ service.interceptors.response.use(
 
       // 如果是登录本身失败或刷新接口失败，直接登出
       if (requestUrl.includes('/auth/login') || requestUrl.includes('/auth/refresh') || !userStore.refreshToken) {
-        userStore.resetToken();
-        location.href = '/login';
+        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -103,9 +125,7 @@ service.interceptors.response.use(
       } catch (refreshErr) {
         // 7 天 Refresh Token 彻底失效，清空会话跳回登录页
         retryRequestsQueue = [];
-        userStore.resetToken();
-        ElMessage.warning('登录会话已完全失效，请重新登录');
-        location.href = '/login';
+        redirectToLogin('登录会话已完全失效，请重新登录');
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
