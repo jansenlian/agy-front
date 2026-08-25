@@ -11,12 +11,9 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.2(vue@3.5.41(typescript@5.7.3))
-      '@greatmap/agy-front':
-        specifier: file:../agy-platform/agy-front
-        version: file:../agy-platform/agy-front(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.7.3)
       axios:
         specifier: ^1.7.9
-        version: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+        version: 1.19.0
       element-plus:
         specifier: ^2.8.8
         version: 2.14.3(vue@3.5.41(typescript@5.7.3))
@@ -53,16 +50,16 @@ importers:
         version: 0.19.0(@vueuse/core@14.3.0(vue@3.5.41(typescript@5.7.3)))(rollup@4.62.4)
       unplugin-vue-components:
         specifier: ^0.28.0
-        version: 0.28.0(@babel/parser@7.29.8)(rollup@4.62.4)(supports-color@7.2.0)(vue@3.5.41(typescript@5.7.3))
+        version: 0.28.0(@babel/parser@7.29.8)(rollup@4.62.4)(vue@3.5.41(typescript@5.7.3))
       vite:
         specifier: ^6.0.3
         version: 6.4.3(@types/node@22.20.1)
       vite-plugin-compression:
         specifier: ^0.5.1
-        version: 0.5.1(supports-color@7.2.0)(vite@6.4.3(@types/node@22.20.1))
+        version: 0.5.1(vite@6.4.3(@types/node@22.20.1))
       vite-plugin-svg-icons:
         specifier: ^2.0.1
-        version: 2.0.1(supports-color@7.2.0)(vite@6.4.3(@types/node@22.20.1))
+        version: 2.0.1(vite@6.4.3(@types/node@22.20.1))
       vue-tsc:
         specifier: ^2.1.10
         version: 2.2.12(typescript@5.7.3)
@@ -262,9 +259,6 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
-
-  '@greatmap/agy-front@file:../agy-platform/agy-front':
-    resolution: {directory: ../agy-platform/agy-front, type: directory}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -484,11 +478,6 @@ packages:
 
   '@volar/typescript@2.4.15':
     resolution: {integrity: sha512-2aZ8i0cqPGjXb4BhkMsPYDkkuc2ZQ6yOpqwAuNwUoncELqoy5fRgOQtLR9gB0g902iS0NAkvpIzs27geVyVdPg==}
-    peerDependencies:
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   '@vue/compiler-core@3.5.41':
     resolution: {integrity: sha512-q0Xtv/F9w2YO/7htQhtiL+Ev2WCJbe5N2hc+XfgyKkEKqWpSxknmT8QOuGdEKNdjPq0c3F7rNpFkTo3Kfrm7pg==}
@@ -2110,23 +2099,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@greatmap/agy-front@file:../agy-platform/agy-front(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.7.3)':
-    dependencies:
-      '@element-plus/icons-vue': 2.3.2(vue@3.5.41(typescript@5.7.3))
-      axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
-      element-plus: 2.14.3(vue@3.5.41(typescript@5.7.3))
-      lodash-es: 4.18.1
-      pinia: 3.0.4(typescript@5.7.3)(vue@3.5.41(typescript@5.7.3))
-      pinia-plugin-persistedstate: 4.7.1(pinia@3.0.4(typescript@5.7.3)(vue@3.5.41(typescript@5.7.3)))
-      vue: 3.5.41(typescript@5.7.3)
-      vue-router: 4.6.4(vue@3.5.41(typescript@5.7.3))
-    transitivePeerDependencies:
-      - '@nuxt/kit'
-      - '@pinia/nuxt'
-      - debug
-      - supports-color
-      - typescript
-
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -2275,13 +2247,11 @@ snapshots:
 
   '@volar/source-map@2.4.15': {}
 
-  '@volar/typescript@2.4.15(typescript@5.7.3)':
+  '@volar/typescript@2.4.15':
     dependencies:
       '@volar/language-core': 2.4.15
       path-browserify: 1.0.1
       vscode-uri: 3.1.0
-    optionalDependencies:
-      typescript: 5.7.3
 
   '@vue/compiler-core@3.5.41':
     dependencies:
@@ -2390,9 +2360,9 @@ snapshots:
 
   acorn@8.18.0: {}
 
-  agent-base@6.0.2(supports-color@7.2.0):
+  agent-base@6.0.2:
     dependencies:
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -2448,11 +2418,11 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
+  axios@1.19.0:
     dependencies:
-      follow-redirects: 1.16.0(debug@4.4.3(supports-color@7.2.0))
+      follow-redirects: 1.16.0
       form-data: 4.0.6
-      https-proxy-agent: 5.0.1(supports-color@7.2.0)
+      https-proxy-agent: 5.0.1
       proxy-from-env: 2.1.0
     transitivePeerDependencies:
       - debug
@@ -2484,7 +2454,7 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
-  braces@2.3.2(supports-color@7.2.0):
+  braces@2.3.2:
     dependencies:
       arr-flatten: 1.1.0
       array-unique: 0.3.2
@@ -2492,7 +2462,7 @@ snapshots:
       fill-range: 4.0.0
       isobject: 3.0.1
       repeat-element: 1.1.4
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       snapdragon-node: 2.1.1
       split-string: 3.1.0
       to-regex: 3.0.2
@@ -2643,17 +2613,13 @@ snapshots:
 
   de-indent@1.0.2: {}
 
-  debug@2.6.9(supports-color@7.2.0):
+  debug@2.6.9:
     dependencies:
       ms: 2.0.0
-    optionalDependencies:
-      supports-color: 7.2.0
 
-  debug@4.4.3(supports-color@7.2.0):
+  debug@4.4.3:
     dependencies:
       ms: 2.1.3
-    optionalDependencies:
-      supports-color: 7.2.0
 
   decode-uri-component@0.2.2: {}
 
@@ -2882,14 +2848,14 @@ snapshots:
 
   etag@1.8.1: {}
 
-  expand-brackets@2.1.4(supports-color@7.2.0):
+  expand-brackets@2.1.4:
     dependencies:
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       define-property: 0.2.5
       extend-shallow: 2.0.1
       posix-character-classes: 0.1.1
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -2905,15 +2871,15 @@ snapshots:
       assign-symbols: 1.0.0
       is-extendable: 1.0.1
 
-  extglob@2.0.4(supports-color@7.2.0):
+  extglob@2.0.4:
     dependencies:
       array-unique: 0.3.2
       define-property: 1.0.0
-      expand-brackets: 2.1.4(supports-color@7.2.0)
+      expand-brackets: 2.1.4
       extend-shallow: 2.0.1
       fragment-cache: 0.2.1
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -2945,9 +2911,7 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  follow-redirects@1.16.0(debug@4.4.3(supports-color@7.2.0)):
-    optionalDependencies:
-      debug: 4.4.3(supports-color@7.2.0)
+  follow-redirects@1.16.0: {}
 
   for-each@0.3.5:
     dependencies:
@@ -3093,10 +3057,10 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
-  https-proxy-agent@5.0.1(supports-color@7.2.0):
+  https-proxy-agent@5.0.1:
     dependencies:
-      agent-base: 6.0.2(supports-color@7.2.0)
-      debug: 4.4.3(supports-color@7.2.0)
+      agent-base: 6.0.2
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -3347,20 +3311,20 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  micromatch@3.1.0(supports-color@7.2.0):
+  micromatch@3.1.0:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
-      braces: 2.3.2(supports-color@7.2.0)
+      braces: 2.3.2
       define-property: 1.0.0
       extend-shallow: 2.0.1
-      extglob: 2.0.4(supports-color@7.2.0)
+      extglob: 2.0.4
       fragment-cache: 0.2.1
       kind-of: 5.1.0
-      nanomatch: 1.2.13(supports-color@7.2.0)
+      nanomatch: 1.2.13
       object.pick: 1.3.0
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -3404,7 +3368,7 @@ snapshots:
 
   nanoid@3.3.17: {}
 
-  nanomatch@1.2.13(supports-color@7.2.0):
+  nanomatch@1.2.13:
     dependencies:
       arr-diff: 4.0.0
       array-unique: 0.3.2
@@ -3415,7 +3379,7 @@ snapshots:
       kind-of: 6.0.3
       object.pick: 1.3.0
       regex-not: 1.0.2
-      snapdragon: 0.8.2(supports-color@7.2.0)
+      snapdragon: 0.8.2
       to-regex: 3.0.2
     transitivePeerDependencies:
       - supports-color
@@ -3739,10 +3703,10 @@ snapshots:
     dependencies:
       kind-of: 3.2.2
 
-  snapdragon@0.8.2(supports-color@7.2.0):
+  snapdragon@0.8.2:
     dependencies:
       base: 0.11.2
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       define-property: 0.2.5
       extend-shallow: 2.0.1
       map-cache: 0.2.2
@@ -3838,7 +3802,7 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
 
-  svg-baker@1.7.0(supports-color@7.2.0):
+  svg-baker@1.7.0:
     dependencies:
       bluebird: 3.7.2
       clone: 2.1.2
@@ -3846,7 +3810,7 @@ snapshots:
       image-size: 0.5.5
       loader-utils: 1.4.2
       merge-options: 1.0.1
-      micromatch: 3.1.0(supports-color@7.2.0)
+      micromatch: 3.1.0
       postcss: 5.2.18
       postcss-prefix-selector: 1.16.1(postcss@5.2.18)
       posthtml-rename-id: 1.0.12
@@ -3996,12 +3960,12 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  unplugin-vue-components@0.28.0(@babel/parser@7.29.8)(rollup@4.62.4)(supports-color@7.2.0)(vue@3.5.41(typescript@5.7.3)):
+  unplugin-vue-components@0.28.0(@babel/parser@7.29.8)(rollup@4.62.4)(vue@3.5.41(typescript@5.7.3)):
     dependencies:
       '@antfu/utils': 0.7.10
       '@rollup/pluginutils': 5.4.0(rollup@4.62.4)
       chokidar: 3.6.0
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       fast-glob: 3.3.3
       local-pkg: 0.5.1
       magic-string: 0.30.21
@@ -4040,24 +4004,24 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-plugin-compression@0.5.1(supports-color@7.2.0)(vite@6.4.3(@types/node@22.20.1)):
+  vite-plugin-compression@0.5.1(vite@6.4.3(@types/node@22.20.1)):
     dependencies:
       chalk: 4.1.2
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       fs-extra: 10.1.0
       vite: 6.4.3(@types/node@22.20.1)
     transitivePeerDependencies:
       - supports-color
 
-  vite-plugin-svg-icons@2.0.1(supports-color@7.2.0)(vite@6.4.3(@types/node@22.20.1)):
+  vite-plugin-svg-icons@2.0.1(vite@6.4.3(@types/node@22.20.1)):
     dependencies:
       '@types/svgo': 2.6.4
       cors: 2.8.6
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       etag: 1.8.1
       fs-extra: 10.1.0
       pathe: 0.2.0
-      svg-baker: 1.7.0(supports-color@7.2.0)
+      svg-baker: 1.7.0
       svgo: 2.8.3
       vite: 6.4.3(@types/node@22.20.1)
     transitivePeerDependencies:
@@ -4086,7 +4050,7 @@ snapshots:
 
   vue-tsc@2.2.12(typescript@5.7.3):
     dependencies:
-      '@volar/typescript': 2.4.15(typescript@5.7.3)
+      '@volar/typescript': 2.4.15
       '@vue/language-core': 2.2.12(typescript@5.7.3)
       typescript: 5.7.3
 

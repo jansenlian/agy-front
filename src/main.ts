@@ -9,7 +9,7 @@ import 'virtual:svg-icons-register';
 import App from './App.vue';
 import router from './router';
 import './router/permission';
-import { setupPermissionDirective } from '@greatmap/agy-front';
+import { setupPermissionDirective } from './directive/permission';
 
 const app = createApp(App);
 

@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="login-header">
         <h2 class="title">AGY 工具集成系统</h2>
-        <p class="subtitle">基于 Vue 3.5 + Vite 6 + Element Plus + @greatmap/agy-front</p>
+        <p class="subtitle">基于 Vue 3.5 + Vite 6 + Element Plus</p>
       </div>
 
       <el-form :model="loginForm" :rules="rules" ref="formRef" size="large" @keyup.enter="handleLogin">
@@ -28,7 +28,9 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ElMessage, type FormInstance } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
-import { useUserStore, encryptPassword, setPublicKey, getPublicKeyApi } from '@greatmap/agy-front';
+import { useUserStore } from '@/stores/user';
+import { encryptPassword, setPublicKey } from '@/utils/rsa';
+import { getPublicKeyApi } from '@/api/modules/authApi';
 
 const router = useRouter();
 const route = useRoute();

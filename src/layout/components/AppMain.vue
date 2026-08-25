@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@greatmap/agy-front';
+import { useAppStore } from '@/stores/app';
 const appStore = useAppStore();
 </script>
 

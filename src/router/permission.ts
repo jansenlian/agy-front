@@ -1,5 +1,6 @@
 import router from './index';
-import { useUserStore, getMenuTreeApi } from '@greatmap/agy-front';
+import { useUserStore } from '@/stores/user';
+import { getMenuTreeApi } from '@/api/modules/authApi';
 import { registerDynamicRoutes } from './dynamicRoutes';
 
 const whiteList = ['/login', '/404'];

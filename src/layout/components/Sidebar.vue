@@ -67,8 +67,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useAppStore, getMenuTreeApi, type SysMenuVO } from '@greatmap/agy-front';
+import { useAppStore } from '@/stores/app';
+import { getMenuTreeApi } from '@/api/modules/authApi';
+import type { SysMenuVO } from '@/api/types/userModel';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import { Platform, Odometer, Document, Tools, Lock, DataAnalysis } from '@element-plus/icons-vue';
 import { registerDynamicRoutes } from '@/router/dynamicRoutes';

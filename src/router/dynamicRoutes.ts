@@ -1,31 +1,12 @@
 import type { Router, RouteRecordRaw } from 'vue-router';
-import type { SysMenuVO } from '@greatmap/agy-front';
-import * as AgyUI from '@greatmap/agy-front';
+import type { SysMenuVO } from '@/api/types/userModel';
 
-// 本地业务页面
+// 本地所有业务与系统管理视图组件
 const viewModules = import.meta.glob('/src/views/**/*.vue');
 const NotFoundComponent = () => import('@/views/error/404.vue');
 
-// 统一映射 @greatmap/agy-ui 中的公共系统管理组件
-const systemComponentMap: Record<string, any> = {
-  'system/user/index': AgyUI.SysUserView,
-  'system/user': AgyUI.SysUserView,
-  'system/role/index': AgyUI.SysRoleView,
-  'system/role': AgyUI.SysRoleView,
-  'system/menu/index': AgyUI.SysMenuView,
-  'system/menu': AgyUI.SysMenuView,
-  'system/dict/index': AgyUI.SysDictView,
-  'system/dict': AgyUI.SysDictView,
-  'system/log/index': AgyUI.SysLoginLogView,
-  'system/log/login': AgyUI.SysLoginLogView,
-  'system/log/loginLog': AgyUI.SysLoginLogView,
-  'system/log/oper/index': AgyUI.SysOperLogView,
-  'system/log/oper': AgyUI.SysOperLogView,
-  'system/log/operLog': AgyUI.SysOperLogView,
-};
-
 /**
- * 智能组件解析器：优先匹配公共组件库 @greatmap/agy-ui，其次查找本地业务 views
+ * 智能组件解析器：自动在 /src/views/ 目录下解析匹配 Vue 组件
  */
 function resolveComponent(componentPath?: string) {
   if (!componentPath || !componentPath.trim()) {
@@ -38,12 +19,6 @@ function resolveComponent(componentPath?: string) {
     .replace(/^\//, '')
     .replace(/\.vue$/, '');
 
-  // 1. 如果匹配到公共组件库中的系统管理页面，直接返回组件
-  if (systemComponentMap[clean]) {
-    return systemComponentMap[clean];
-  }
-
-  // 2. 查找本地业务页面
   const candidates = [
     `/src/views/${clean}.vue`,
     `/src/views/${clean}/index.vue`,
