@@ -55,11 +55,8 @@
 import { ref, reactive, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage, type FormInstance } from 'element-plus';
-import { useAppStore } from '@/stores/app';
-import { useUserStore } from '@/stores/user';
+import { useAppStore, useUserStore, updateUserPasswordApi, encryptPassword } from '@greatmap/agy-front';
 import { Fold, Expand, Lock, SwitchButton } from '@element-plus/icons-vue';
-import { updateUserPasswordApi } from '@/api/modules/userApi';
-import { encryptPassword } from '@/utils/rsa';
 
 const route = useRoute();
 const router = useRouter();

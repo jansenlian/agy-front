@@ -28,9 +28,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ElMessage, type FormInstance } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
-import { useUserStore } from '@/stores/user';
-import { encryptPassword, setPublicKey } from '@/utils/rsa';
-import { getPublicKeyApi } from '@/api/modules/authApi';
+import { useUserStore, encryptPassword, setPublicKey, getPublicKeyApi } from '@greatmap/agy-front';
 
 const router = useRouter();
 const route = useRoute();

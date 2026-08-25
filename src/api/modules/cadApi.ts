@@ -1,4 +1,4 @@
-import request from '@/utils/request';
+import { request } from '@greatmap/agy-front';
 
 export interface CadLayerStat {
   layerName: string;

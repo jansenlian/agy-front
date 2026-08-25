@@ -1,5 +1,5 @@
 import type { Router, RouteRecordRaw } from 'vue-router';
-import type { SysMenuVO } from '@/api/types/userModel';
+import type { SysMenuVO } from '@greatmap/agy-front';
 import * as AgyUI from '@greatmap/agy-front';
 
 // 本地业务页面

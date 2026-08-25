@@ -17,8 +17,7 @@ import Sidebar from './components/Sidebar.vue';
 import Header from './components/Header.vue';
 import TagsView from './components/TagsView.vue';
 import AppMain from './components/AppMain.vue';
-import { useAppStore } from '@/stores/app';
-import { useUserStore } from '@/stores/user';
+import { useAppStore, useUserStore } from '@greatmap/agy-front';
 
 const appStore = useAppStore();
 const userStore = useUserStore();
