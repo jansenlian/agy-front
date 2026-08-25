@@ -6,6 +6,13 @@ import { registerDynamicRoutes } from './dynamicRoutes';
 const whiteList = ['/login', '/404'];
 let isDynamicRoutesAdded = false;
 
+/**
+ * 重置动态路由挂载标记 (登出或切换账号时调用)
+ */
+export function resetDynamicRoutesFlag() {
+  isDynamicRoutesAdded = false;
+}
+
 router.beforeEach(async (to, from, next) => {
   document.title = (to.meta.title ? `${to.meta.title} - ` : '') + 'AGY 工具集成系统';
 
@@ -35,6 +42,7 @@ router.beforeEach(async (to, from, next) => {
         ]);
 
         if (menuTree && menuTree.length > 0) {
+          userStore.setMenuTree(menuTree);
           registerDynamicRoutes(router, menuTree);
         }
 
@@ -51,7 +59,7 @@ router.beforeEach(async (to, from, next) => {
 
     next();
   } else {
-    isDynamicRoutesAdded = false;
+    resetDynamicRoutesFlag();
     if (whiteList.includes(to.path)) {
       next();
     } else {

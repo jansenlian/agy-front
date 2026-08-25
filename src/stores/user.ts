@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { SysUserVO } from '../api/types/userModel';
+import type { SysUserVO, SysMenuVO } from '../api/types/userModel';
 import { loginApi, getUserInfoApi, getUserPermissionsApi, refreshTokenApi } from '../api/modules/authApi';
+import { resetDynamicRoutesFlag } from '../router/permission';
 
 export const useUserStore = defineStore(
   'user',
@@ -10,6 +11,7 @@ export const useUserStore = defineStore(
     const refreshToken = ref<string>('');
     const userInfo = ref<SysUserVO | null>(null);
     const permissions = ref<string[]>([]);
+    const menuTree = ref<SysMenuVO[]>([]);
 
     async function login(loginForm: { username: string; password: string }) {
       const res = await loginApi(loginForm);
@@ -24,6 +26,10 @@ export const useUserStore = defineStore(
       refreshToken.value = refreshTok;
       userInfo.value = user;
       loadPermissions();
+    }
+
+    function setMenuTree(menus: SysMenuVO[]) {
+      menuTree.value = menus || [];
     }
 
     async function refreshUserToken(): Promise<string> {
@@ -60,6 +66,8 @@ export const useUserStore = defineStore(
       refreshToken.value = '';
       userInfo.value = null;
       permissions.value = [];
+      menuTree.value = [];
+      resetDynamicRoutesFlag();
     }
 
     return {
@@ -67,8 +75,10 @@ export const useUserStore = defineStore(
       refreshToken,
       userInfo,
       permissions,
+      menuTree,
       login,
       setAuthSession,
+      setMenuTree,
       refreshUserToken,
       getUserInfo,
       loadPermissions,
@@ -77,7 +87,7 @@ export const useUserStore = defineStore(
   },
   {
     persist: {
-      pick: ['token', 'refreshToken', 'userInfo', 'permissions'],
+      pick: ['token', 'refreshToken', 'userInfo', 'permissions', 'menuTree'],
     },
   }
 );

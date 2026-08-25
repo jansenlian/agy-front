@@ -66,19 +66,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAppStore } from '@/stores/app';
-import { getMenuTreeApi } from '@/api/modules/authApi';
-import type { SysMenuVO } from '@/api/types/userModel';
+import { useUserStore } from '@/stores/user';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import { Platform, Odometer, Document, Tools, Lock, DataAnalysis } from '@element-plus/icons-vue';
-import { registerDynamicRoutes } from '@/router/dynamicRoutes';
 
 const route = useRoute();
-const router = useRouter();
 const appStore = useAppStore();
+const userStore = useUserStore();
+
 const activeMenu = computed(() => route.path);
-const menuList = ref<SysMenuVO[]>([]);
+const menuList = computed(() => userStore.menuTree || []);
 
 function getIcon(iconName?: string, defaultName = 'Document') {
   if (!iconName) return (ElementPlusIconsVue as any)[defaultName] || Document;
@@ -86,27 +86,6 @@ function getIcon(iconName?: string, defaultName = 'Document') {
   const pascalName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
   return (ElementPlusIconsVue as any)[pascalName] || (ElementPlusIconsVue as any)[defaultName] || Document;
 }
-
-async function loadSidebarMenus() {
-  try {
-    const res = await getMenuTreeApi();
-    if (res && res.length > 0) {
-      menuList.value = res;
-      registerDynamicRoutes(router, res);
-    }
-  } catch (e) {
-    console.error('获取动态菜单树失败', e);
-  }
-}
-
-onMounted(() => {
-  loadSidebarMenus();
-  window.addEventListener('refresh-sidebar-menu', loadSidebarMenus);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('refresh-sidebar-menu', loadSidebarMenus);
-});
 </script>
 
 <style scoped>
