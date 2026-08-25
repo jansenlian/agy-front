@@ -51,7 +51,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api/business': {
-        target: 'http://127.0.0.1:9202',
+        target: 'http://127.0.0.1:9201',
         changeOrigin: true,
       },
       '/api/v1/cad': {
