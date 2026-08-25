@@ -21,8 +21,8 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover">
-          <template #header>📐 公共组件库</template>
-          <div class="card-value">@greatmap/agy-ui</div>
+          <template #header>📐 前端应用架构</template>
+          <div class="card-value">Vue 3.5 + Vite 6</div>
         </el-card>
       </el-col>
     </el-row>
@@ -59,7 +59,7 @@
       <template #header>
         <span>🛠️ 欢迎进入 AGY 工具集成系统</span>
       </template>
-      <p>当前系统为实用开发与工程工具前端，支持<strong>独立定制登录页、内置 DWG 图纸解析与加解密测试、直接引入 @greatmap/agy-ui 共享系统管理能力</strong>。您可以在左侧菜单访问工具功能与系统管理模块。</p>
+      <p>当前系统为实用开发与工程工具前端，内置<strong>DWG 图纸解析、国密与通用加解密、AI 智能体对话以及系统管理（用户/角色/菜单/字典/日志）全套能力</strong>。您可以在左侧菜单访问工具功能与系统管理模块。</p>
     </el-card>
   </div>
 </template>

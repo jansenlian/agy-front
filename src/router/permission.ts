@@ -14,7 +14,8 @@ export function resetDynamicRoutesFlag() {
 }
 
 router.beforeEach(async (to, from, next) => {
-  document.title = (to.meta.title ? `${to.meta.title} - ` : '') + 'AGY 工具集成系统';
+  const appTitle = import.meta.env.VITE_APP_TITLE || 'AGY 工具集成系统';
+  document.title = to.meta.title ? `${to.meta.title} - ${appTitle}` : appTitle;
 
   const userStore = useUserStore();
 

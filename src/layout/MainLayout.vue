@@ -27,7 +27,7 @@ const watermarkContent = computed(() => {
   const user = userStore.userInfo;
   const realName = user?.realName || user?.username || '未登录用户';
   const subInfo = user?.username ? `(${user.username})` : '';
-  const appTitle = import.meta.env.VITE_APP_TITLE || 'AGY 业务系统';
+  const appTitle = import.meta.env.VITE_APP_TITLE || 'AGY 工具集成系统';
   const dateStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
 
   return [

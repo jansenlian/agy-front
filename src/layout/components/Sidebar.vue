@@ -2,7 +2,7 @@
   <div class="sidebar-container" :class="{ collapsed: appStore.sidebarCollapsed }">
     <div class="logo-container">
       <el-icon class="logo-icon"><Platform /></el-icon>
-      <span v-if="!appStore.sidebarCollapsed" class="logo-title">AGY 工具集成系统</span>
+      <span v-if="!appStore.sidebarCollapsed" class="logo-title">{{ appTitle }}</span>
     </div>
     <el-menu
       :default-active="activeMenu"
@@ -76,6 +76,7 @@ import { Platform, Odometer, Document, Tools, Lock, DataAnalysis } from '@elemen
 const route = useRoute();
 const appStore = useAppStore();
 const userStore = useUserStore();
+const appTitle = import.meta.env.VITE_APP_TITLE || 'AGY 工具集成系统';
 
 const activeMenu = computed(() => route.path);
 const menuList = computed(() => userStore.menuTree || []);

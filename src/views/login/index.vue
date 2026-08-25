@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-box">
       <div class="login-header">
-        <h2 class="title">AGY 工具集成系统</h2>
+        <h2 class="title">{{ appTitle }}</h2>
         <p class="subtitle">基于 Vue 3.5 + Vite 6 + Element Plus</p>
       </div>
 
@@ -35,6 +35,7 @@ import { getPublicKeyApi } from '@/api/modules/authApi';
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
+const appTitle = import.meta.env.VITE_APP_TITLE || 'AGY 工具集成系统';
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 
