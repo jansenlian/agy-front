@@ -223,33 +223,28 @@ function initAntigravityCanvas() {
       p.pulseAngle += p.pulseSpeed;
       p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.22;
 
-      // 鼠标吸附物理引力场
+      // 鼠标纯直线物理吸附场 (零旋转 / 零转圈,完全纯粹的直线磁吸跟随)
       if (mouse.isActive) {
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < mouse.radius && dist > 1) {
-          // 距离越近引力加速度越强 (平滑指数衰减)
-          const force = Math.pow((mouse.radius - dist) / mouse.radius, 1.4);
-          const pull = force * 1.8 * p.mass;
+          const force = (mouse.radius - dist) / mouse.radius;
+          const pull = force * 2.2 * p.mass;
 
-          // 向鼠标坐标平滑吸附汇聚
+          // 纯粹直接向鼠标坐标吸附牵引
           p.vx += (dx / dist) * pull;
           p.vy += (dy / dist) * pull;
 
-          // 核心轻微切向扰动(避免粒子全部重叠在一起,形成随鼠标流动的星群)
-          p.vx += (-dy / dist) * force * 0.6;
-          p.vy += (dx / dist) * force * 0.6;
-
-          // 靠近鼠标时星星高亮
-          p.alpha = Math.min(1, p.baseAlpha + force * 0.6);
+          // 靠近鼠标时光芒增强
+          p.alpha = Math.min(1, p.baseAlpha + force * 0.5);
         }
       }
 
       // 速度阻尼与惯性平滑
-      p.vx *= 0.93;
-      p.vy *= 0.93;
+      p.vx *= 0.92;
+      p.vy *= 0.92;
 
       // 叠加自然宇宙微漂移
       p.x += p.vx + p.driftVx;
