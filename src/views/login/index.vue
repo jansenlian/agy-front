@@ -83,59 +83,33 @@ const rules = {
 };
 
 /* =========================================================================
- * Google Antigravity (AGY) 官方级物理引力场仿真引擎 (True Gravitational Engine)
+ * Antigravity (AGY) 60FPS 丝滑高帧率星空引力场物理引擎
  * ========================================================================= */
 
 interface StarParticle {
   x: number;
   y: number;
-  z: number; // 3D 深度视差 [0.2, 1.5]
+  originX: number;
+  originY: number;
   vx: number;
   vy: number;
-  baseRadius: number;
+  radius: number;
   baseAlpha: number;
   alpha: number;
   pulseSpeed: number;
   pulseAngle: number;
   color: string;
-  glowColor: string;
-  mass: number; // 质量影响受力加速度
-}
-
-interface Shockwave {
-  x: number;
-  y: number;
-  radius: number;
-  maxRadius: number;
-  speed: number;
-  strength: number;
-  alpha: number;
 }
 
 let animationFrameId: number | null = null;
 const mouse = {
   x: -9999,
   y: -9999,
-  lastX: -9999,
-  lastY: -9999,
-  vx: 0,
-  vy: 0,
   isActive: false,
-  gravityRadius: 320, // 引力影响范围
-  coreRadius: 28,     // 核心事件视界斥力半径(形成吸积盘光环)
+  radius: 180, // 鼠标引力捕获半径
 };
 
-const shockwaves: Shockwave[] = [];
-
-// AGY 标志性星空深空色系
-const STAR_PALETTES = [
-  { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.9)' },
-  { color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.85)' },
-  { color: '#60a5fa', glow: 'rgba(96, 165, 250, 0.85)' },
-  { color: '#818cf8', glow: 'rgba(129, 140, 248, 0.85)' },
-  { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.8)' },
-  { color: '#2dd4bf', glow: 'rgba(45, 212, 191, 0.8)' },
-];
+const STAR_COLORS = ['#38bdf8', '#818cf8', '#c084fc', '#67e8f9', '#ffffff', '#93c5fd'];
 
 function initAntigravityCanvas() {
   const canvas = canvasRef.value;
@@ -144,51 +118,58 @@ function initAntigravityCanvas() {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  let width = (canvas.width = window.innerWidth);
-  let height = (canvas.height = window.innerHeight);
+  // 适配 Retina 高清屏 (DevicePixelRatio)
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let width = window.innerWidth;
+  let height = window.innerHeight;
 
-  // 高密度星尘群: 根据屏幕自适应 600 ~ 1000 颗
-  const particleCount = Math.min(Math.max(Math.floor((width * height) / 2200), 550), 1000);
+  function resizeCanvas() {
+    if (!canvas || !ctx) return;
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.scale(dpr, dpr);
+  }
+
+  resizeCanvas();
+
+  // 最佳平衡密度 (180 ~ 240 颗),保证极致 60/120 FPS 满帧丝滑
+  const particleCount = Math.min(Math.max(Math.floor((width * height) / 8000), 160), 240);
   const particles: StarParticle[] = [];
 
   for (let i = 0; i < particleCount; i++) {
-    const palette = STAR_PALETTES[Math.floor(Math.random() * STAR_PALETTES.length)];
-    const z = Math.random() * 1.3 + 0.3; // 深度
-    const baseRadius = (Math.random() * 1.6 + 0.4) * z;
-    const baseAlpha = (Math.random() * 0.55 + 0.35) * Math.min(1, z);
+    const x = Math.random() * width;
+    const y = Math.random() * height;
+    const color = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+    const radius = Math.random() * 1.8 + 0.8;
+    const baseAlpha = Math.random() * 0.5 + 0.4;
 
     particles.push({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      z,
-      vx: (Math.random() - 0.5) * 0.3 * z,
-      vy: (Math.random() - 0.5) * 0.3 * z,
-      baseRadius,
+      x,
+      y,
+      originX: x,
+      originY: y,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      radius,
       baseAlpha,
       alpha: baseAlpha,
-      pulseSpeed: Math.random() * 0.025 + 0.008,
+      pulseSpeed: Math.random() * 0.03 + 0.01,
       pulseAngle: Math.random() * Math.PI * 2,
-      color: palette.color,
-      glowColor: palette.glow,
-      mass: Math.random() * 0.8 + 0.6,
+      color,
     });
   }
 
   function handleResize() {
-    if (!canvas) return;
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+    resizeCanvas();
   }
 
   function handleMouseMove(e: MouseEvent) {
-    if (mouse.lastX !== -9999) {
-      mouse.vx = (e.clientX - mouse.lastX) * 0.4;
-      mouse.vy = (e.clientY - mouse.lastY) * 0.4;
-    }
     mouse.x = e.clientX;
     mouse.y = e.clientY;
-    mouse.lastX = e.clientX;
-    mouse.lastY = e.clientY;
     mouse.isActive = true;
   }
 
@@ -196,36 +177,13 @@ function initAntigravityCanvas() {
     mouse.isActive = false;
     mouse.x = -9999;
     mouse.y = -9999;
-    mouse.lastX = -9999;
-    mouse.lastY = -9999;
-    mouse.vx = 0;
-    mouse.vy = 0;
-  }
-
-  function handleClick(e: MouseEvent) {
-    // 触发 AGY 超新星引力激波
-    shockwaves.push({
-      x: e.clientX,
-      y: e.clientY,
-      radius: 5,
-      maxRadius: 360,
-      speed: 12,
-      strength: 22,
-      alpha: 0.9,
-    });
   }
 
   function handleTouchMove(e: TouchEvent) {
     if (e.touches.length > 0) {
       const touch = e.touches[0];
-      if (mouse.lastX !== -9999) {
-        mouse.vx = (touch.clientX - mouse.lastX) * 0.4;
-        mouse.vy = (touch.clientY - mouse.lastY) * 0.4;
-      }
       mouse.x = touch.clientX;
       mouse.y = touch.clientY;
-      mouse.lastX = touch.clientX;
-      mouse.lastY = touch.clientY;
       mouse.isActive = true;
     }
   }
@@ -237,190 +195,101 @@ function initAntigravityCanvas() {
   window.addEventListener('resize', handleResize);
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mouseleave', handleMouseLeave);
-  window.addEventListener('click', handleClick);
   window.addEventListener('touchmove', handleTouchMove, { passive: true });
   window.addEventListener('touchend', handleTouchEnd);
 
   function render() {
     if (!ctx) return;
 
-    // 1. 半透明背景涂刷,生成丝滑运动残影 (Organic Motion Trails)
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(5, 8, 17, 0.28)';
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height);
 
-    // 鼠标速度衰减
-    mouse.vx *= 0.88;
-    mouse.vy *= 0.88;
-
-    // 2. 引力波激波演算与渲染
-    for (let i = shockwaves.length - 1; i >= 0; i--) {
-      const sw = shockwaves[i];
-      sw.radius += sw.speed;
-      sw.alpha *= 0.94;
-
-      if (sw.alpha <= 0.01 || sw.radius >= sw.maxRadius) {
-        shockwaves.splice(i, 1);
-        continue;
-      }
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(56, 189, 248, ${sw.alpha * 0.7})`;
-      ctx.lineWidth = 2.5;
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = '#38bdf8';
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // 3. 启用高能增色叠加 (Additive Blending - 核心高能光子融合)
-    ctx.globalCompositeOperation = 'lighter';
-
-    // 鼠标引力核心微弱星云光晕
-    if (mouse.isActive) {
-      const aura = ctx.createRadialGradient(
-        mouse.x,
-        mouse.y,
-        0,
-        mouse.x,
-        mouse.y,
-        mouse.gravityRadius * 0.8
-      );
-      aura.addColorStop(0, 'rgba(56, 189, 248, 0.18)');
-      aura.addColorStop(0.3, 'rgba(129, 140, 248, 0.08)');
-      aura.addColorStop(0.7, 'rgba(168, 85, 247, 0.03)');
-      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-      ctx.save();
-      ctx.fillStyle = aura;
-      ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, mouse.gravityRadius * 0.8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // 4. 粒子天体引力动力学物理循环
+    // 1. 物理计算与粒子更新
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
-      // 自然微光呼吸闪烁
+      // 自然微光呼吸
       p.pulseAngle += p.pulseSpeed;
-      p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.18;
+      p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.2;
 
-      // 激波排斥力作用
-      for (let s = 0; s < shockwaves.length; s++) {
-        const sw = shockwaves[s];
-        const sdx = p.x - sw.x;
-        const sdy = p.y - sw.y;
-        const sDist = Math.hypot(sdx, sdy);
-        const diff = Math.abs(sDist - sw.radius);
-
-        if (diff < 40 && sDist > 1) {
-          const force = (1 - diff / 40) * sw.strength * sw.alpha;
-          p.vx += (sdx / sDist) * force;
-          p.vy += (sdy / sDist) * force;
-        }
-      }
-
-      // 鼠标天体万有引力与吸积盘切向角动量
-      if (mouse.isActive) {
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < mouse.gravityRadius && dist > 0.1) {
-          const normX = dx / dist;
-          const normY = dy / dist;
-
-          // 核心事件视界防坍缩排斥力 (形成围绕鼠标旋转的高能吸积盘光环)
-          if (dist < mouse.coreRadius) {
-            const repelRatio = (1 - dist / mouse.coreRadius);
-            const repelForce = repelRatio * 2.8;
-            p.vx -= normX * repelForce;
-            p.vy -= normY * repelForce;
-
-            // 核心强自旋角速度
-            p.vx += -normY * 4.2;
-            p.vy += normX * 4.2;
-            p.alpha = 1;
-          } else {
-            // 平滑引力衰减模型 F ~ G / (r * factor + 1)
-            const gravityRatio = Math.pow((mouse.gravityRadius - dist) / mouse.gravityRadius, 1.6);
-            const attractForce = gravityRatio * 0.9 * p.mass;
-
-            // 向心吸引力
-            p.vx += normX * attractForce;
-            p.vy += normY * attractForce;
-
-            // 切向自旋角动量 (Keplerian Orbital Angular Velocity: 越近转得越快)
-            const orbitRatio = Math.pow((mouse.gravityRadius - dist) / mouse.gravityRadius, 1.2);
-            const orbitSpeed = orbitRatio * 1.6 * p.z;
-            p.vx += -normY * orbitSpeed;
-            p.vy += normX * orbitSpeed;
-
-            // 鼠标挥动风暴动量传递 (Mouse Velocity Wake)
-            if (Math.abs(mouse.vx) > 0.5 || Math.abs(mouse.vy) > 0.5) {
-              const wakeFactor = gravityRatio * 0.25;
-              p.vx += mouse.vx * wakeFactor;
-              p.vy += mouse.vy * wakeFactor;
-            }
-
-            p.alpha = Math.min(1, p.baseAlpha + gravityRatio * 0.65);
-          }
-        }
-      }
-
-      // 摩擦阻尼与空间平滑
-      p.vx *= 0.94;
-      p.vy *= 0.94;
-
-      // 宇宙微弱失重布朗漂移
-      p.vx += (Math.random() - 0.5) * 0.05 * p.z;
-      p.vy += (Math.random() - 0.5) * 0.05 * p.z;
-
+      // 基础漂移
       p.x += p.vx;
       p.y += p.vy;
 
-      // 环绕边界穿透
-      if (p.x < -20) p.x = width + 20;
-      if (p.x > width + 20) p.x = -20;
-      if (p.y < -20) p.y = height + 20;
-      if (p.y > height + 20) p.y = -20;
+      // 边界反弹/循环
+      if (p.x < 0 || p.x > width) p.vx = -p.vx;
+      if (p.y < 0 || p.y > height) p.vy = -p.vy;
 
-      // 5. 核心渲染: 速度矢量流光拉伸 (Velocity Vector Streaks)
-      const speed = Math.hypot(p.vx, p.vy);
-      const isFast = speed > 1.2;
+      // 鼠标引力场强力吸附与轨道跟随
+      if (mouse.isActive) {
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
 
-      ctx.save();
-      if (isFast) {
-        // 高速流星光轨拉伸
-        const streakLen = Math.min(speed * 3.5, 30);
-        const tailX = p.x - (p.vx / speed) * streakLen;
-        const tailY = p.y - (p.vy / speed) * streakLen;
+        if (dist < mouse.radius && dist > 1) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          const pullSpeed = force * 2.6;
 
-        ctx.strokeStyle = p.glowColor;
-        ctx.lineWidth = Math.max(0.8, p.baseRadius * 0.85);
-        ctx.globalAlpha = Math.min(1, p.alpha);
-        ctx.shadowBlur = Math.min(speed * 2, 16);
-        ctx.shadowColor = p.color;
+          // 向心引力
+          p.x += (dx / dist) * pullSpeed;
+          p.y += (dy / dist) * pullSpeed;
 
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-      } else {
-        // 低速微光星体
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.baseRadius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha));
-        ctx.shadowBlur = p.baseRadius * 4;
-        ctx.shadowColor = p.glowColor;
-        ctx.fill();
+          // 核心微弱自旋
+          p.x += (-dy / dist) * force * 1.2;
+          p.y += (dx / dist) * force * 1.2;
+
+          p.alpha = Math.min(1, p.baseAlpha + force * 0.5);
+        }
       }
-      ctx.restore();
+
+      // 绘制星星本体 (极速原生绘制,零卡顿)
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha));
+      ctx.fill();
+    }
+
+    // 2. 绘制星网微光连线 (粒子与粒子之间)
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 90) {
+          const lineAlpha = (1 - dist / 90) * 0.28 * Math.min(p1.alpha, p2.alpha);
+          ctx.strokeStyle = `rgba(129, 140, 248, ${lineAlpha})`;
+          ctx.globalAlpha = 1;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 3. 绘制鼠标引力光索连线 (鼠标光标与周围被吸附的星星之间)
+    if (mouse.isActive) {
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < mouse.radius) {
+          const mouseLineAlpha = (1 - dist / mouse.radius) * 0.55;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${mouseLineAlpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.globalAlpha = 1;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
+      }
     }
 
     animationFrameId = requestAnimationFrame(render);
@@ -435,7 +304,6 @@ function initAntigravityCanvas() {
     window.removeEventListener('resize', handleResize);
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseleave', handleMouseLeave);
-    window.removeEventListener('click', handleClick);
     window.removeEventListener('touchmove', handleTouchMove);
     window.removeEventListener('touchend', handleTouchEnd);
   };
