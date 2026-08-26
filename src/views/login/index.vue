@@ -83,14 +83,12 @@ const rules = {
 };
 
 /* =========================================================================
- * Antigravity (AGY) 60FPS 丝滑高帧率星空引力场物理引擎
+ * Antigravity (AGY) 纯净星空粒子引力吸附跟随引擎 (无连线 / 纯星尘引力流)
  * ========================================================================= */
 
 interface StarParticle {
   x: number;
   y: number;
-  originX: number;
-  originY: number;
   vx: number;
   vy: number;
   radius: number;
@@ -99,6 +97,9 @@ interface StarParticle {
   pulseSpeed: number;
   pulseAngle: number;
   color: string;
+  mass: number; // 质量决定吸附跟随的惯性与灵敏度
+  driftVx: number;
+  driftVy: number;
 }
 
 let animationFrameId: number | null = null;
@@ -106,10 +107,19 @@ const mouse = {
   x: -9999,
   y: -9999,
   isActive: false,
-  radius: 180, // 鼠标引力捕获半径
+  radius: 280, // 鼠标引力磁吸捕获半径
 };
 
-const STAR_COLORS = ['#38bdf8', '#818cf8', '#c084fc', '#67e8f9', '#ffffff', '#93c5fd'];
+// 极简深空绚丽星光色谱 (纯白、冰蓝、天青、流光紫、耀金)
+const STAR_COLORS = [
+  '#ffffff',
+  '#e0f2fe',
+  '#38bdf8',
+  '#818cf8',
+  '#c084fc',
+  '#fde047',
+  '#67e8f9',
+];
 
 function initAntigravityCanvas() {
   const canvas = canvasRef.value;
@@ -118,7 +128,6 @@ function initAntigravityCanvas() {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  // 适配 Retina 高清屏 (DevicePixelRatio)
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   let width = window.innerWidth;
   let height = window.innerHeight;
@@ -136,30 +145,33 @@ function initAntigravityCanvas() {
 
   resizeCanvas();
 
-  // 最佳平衡密度 (180 ~ 240 颗),保证极致 60/120 FPS 满帧丝滑
-  const particleCount = Math.min(Math.max(Math.floor((width * height) / 8000), 160), 240);
+  // 300 ~ 450 颗细密发光小星星,呈现出随鼠标流动的星河
+  const particleCount = Math.min(Math.max(Math.floor((width * height) / 4500), 240), 450);
   const particles: StarParticle[] = [];
 
   for (let i = 0; i < particleCount; i++) {
     const x = Math.random() * width;
     const y = Math.random() * height;
     const color = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
-    const radius = Math.random() * 1.8 + 0.8;
-    const baseAlpha = Math.random() * 0.5 + 0.4;
+    const radius = Math.random() * 1.8 + 0.6;
+    const baseAlpha = Math.random() * 0.55 + 0.35;
+    const driftVx = (Math.random() - 0.5) * 0.4;
+    const driftVy = (Math.random() - 0.5) * 0.4;
 
     particles.push({
       x,
       y,
-      originX: x,
-      originY: y,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
+      vx: driftVx,
+      vy: driftVy,
+      driftVx,
+      driftVy,
       radius,
       baseAlpha,
       alpha: baseAlpha,
       pulseSpeed: Math.random() * 0.03 + 0.01,
       pulseAngle: Math.random() * Math.PI * 2,
       color,
+      mass: Math.random() * 0.8 + 0.5,
     });
   }
 
@@ -203,93 +215,60 @@ function initAntigravityCanvas() {
 
     ctx.clearRect(0, 0, width, height);
 
-    // 1. 物理计算与粒子更新
+    // 粒子物理受力演算与纯净星星绘制
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
-      // 自然微光呼吸
+      // 自然微光呼吸闪烁
       p.pulseAngle += p.pulseSpeed;
-      p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.2;
+      p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.22;
 
-      // 基础漂移
-      p.x += p.vx;
-      p.y += p.vy;
-
-      // 边界反弹/循环
-      if (p.x < 0 || p.x > width) p.vx = -p.vx;
-      if (p.y < 0 || p.y > height) p.vy = -p.vy;
-
-      // 鼠标引力场强力吸附与轨道跟随
+      // 鼠标吸附物理引力场
       if (mouse.isActive) {
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < mouse.radius && dist > 1) {
-          const force = (mouse.radius - dist) / mouse.radius;
-          const pullSpeed = force * 2.6;
+          // 距离越近引力加速度越强 (平滑指数衰减)
+          const force = Math.pow((mouse.radius - dist) / mouse.radius, 1.4);
+          const pull = force * 1.8 * p.mass;
 
-          // 向心引力
-          p.x += (dx / dist) * pullSpeed;
-          p.y += (dy / dist) * pullSpeed;
+          // 向鼠标坐标平滑吸附汇聚
+          p.vx += (dx / dist) * pull;
+          p.vy += (dy / dist) * pull;
 
-          // 核心微弱自旋
-          p.x += (-dy / dist) * force * 1.2;
-          p.y += (dx / dist) * force * 1.2;
+          // 核心轻微切向扰动(避免粒子全部重叠在一起,形成随鼠标流动的星群)
+          p.vx += (-dy / dist) * force * 0.6;
+          p.vy += (dx / dist) * force * 0.6;
 
-          p.alpha = Math.min(1, p.baseAlpha + force * 0.5);
+          // 靠近鼠标时星星高亮
+          p.alpha = Math.min(1, p.baseAlpha + force * 0.6);
         }
       }
 
-      // 绘制星星本体 (极速原生绘制,零卡顿)
+      // 速度阻尼与惯性平滑
+      p.vx *= 0.93;
+      p.vy *= 0.93;
+
+      // 叠加自然宇宙微漂移
+      p.x += p.vx + p.driftVx;
+      p.y += p.vy + p.driftVy;
+
+      // 屏幕边界循环穿透
+      if (p.x < -10) p.x = width + 10;
+      if (p.x > width + 10) p.x = -10;
+      if (p.y < -10) p.y = height + 10;
+      if (p.y > height + 10) p.y = -10;
+
+      // 绘制纯净微光星星 (无任何线条干扰,纯净纯星光)
+      ctx.save();
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha));
       ctx.fill();
-    }
-
-    // 2. 绘制星网微光连线 (粒子与粒子之间)
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const p1 = particles[i];
-        const p2 = particles[j];
-        const dx = p1.x - p2.x;
-        const dy = p1.y - p2.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 90) {
-          const lineAlpha = (1 - dist / 90) * 0.28 * Math.min(p1.alpha, p2.alpha);
-          ctx.strokeStyle = `rgba(129, 140, 248, ${lineAlpha})`;
-          ctx.globalAlpha = 1;
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // 3. 绘制鼠标引力光索连线 (鼠标光标与周围被吸附的星星之间)
-    if (mouse.isActive) {
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < mouse.radius) {
-          const mouseLineAlpha = (1 - dist / mouse.radius) * 0.55;
-          ctx.strokeStyle = `rgba(56, 189, 248, ${mouseLineAlpha})`;
-          ctx.lineWidth = 0.8;
-          ctx.globalAlpha = 1;
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-          ctx.lineTo(p.x, p.y);
-          ctx.stroke();
-        }
-      }
+      ctx.restore();
     }
 
     animationFrameId = requestAnimationFrame(render);
