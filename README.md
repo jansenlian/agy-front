@@ -33,7 +33,7 @@ pnpm install
 pnpm dev
 ```
 
-启动后访问本地地址：`http://localhost:5102`
+启动后访问本地地址：`http://localhost:5102` (Vite 自动将 `/api` 请求反向代理至后端网关 `9200` 及各微服务端口)。
 
 ### 3. 生产环境构建
 
