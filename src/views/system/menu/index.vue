@@ -113,7 +113,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Plus, Sort, Refresh, Edit, Delete } from '@element-plus/icons-vue';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import { getAllMenuTreeApi, addMenuApi, updateMenuApi, deleteMenuApi } from '../../../api/modules/menuApi';
 import type { SysMenuVO } from '../../../api/types/userModel';

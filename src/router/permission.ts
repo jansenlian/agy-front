@@ -1,5 +1,6 @@
 import type { Router } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { useAppStore } from '@/stores/app';
 import { getMenuTreeApi } from '@/api/modules/authApi';
 import { registerDynamicRoutes } from './dynamicRoutes';
 
@@ -17,6 +18,14 @@ export function resetDynamicRoutesFlag() {
  * 初始化全局路由鉴权与动态路由守卫
  */
 export function setupPermissionGuard(router: Router) {
+  router.afterEach((to) => {
+    const appStore = useAppStore();
+    const viewName = (to.name as string);
+    if (viewName && to.meta?.keepAlive !== false) {
+      appStore.addCachedView(viewName);
+    }
+  });
+
   router.beforeEach(async (to, from, next) => {
     const appTitle = import.meta.env.VITE_APP_TITLE || 'AGY 工具集成系统';
     document.title = to.meta.title ? `${to.meta.title} - ${appTitle}` : appTitle;

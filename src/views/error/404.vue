@@ -18,8 +18,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { HomeFilled, Setting } from '@element-plus/icons-vue';
-
 const route = useRoute();
 const errorMessage = computed(() => {
   return `当前访问路由 [ ${route.path} ] 未匹配到有效的前端 Vue 业务组件，请核对【菜单管理】中配置的路由路径 (path) 与组件路径 (component) 是否与前端源码文件对应。`;

@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-import { Search, Pointer } from '@element-plus/icons-vue';
+import { Pointer } from '@element-plus/icons-vue';
 
 const props = defineProps<{
   modelValue?: string;

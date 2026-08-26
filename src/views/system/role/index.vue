@@ -342,20 +342,6 @@ function getAllNodeIds(nodes: any[]): string[] {
   return ids;
 }
 
-// 提取所有 2-按钮 ID
-function getAllButtonIds(nodes: any[]): string[] {
-  let ids: string[] = [];
-  for (const node of nodes) {
-    if (node.menuType === 2) {
-      ids.push(node.id);
-    }
-    if (node.children) {
-      ids = ids.concat(getAllButtonIds(node.children));
-    }
-  }
-  return ids;
-}
-
 const queryForm = reactive({
   pageNo: 1,
   pageSize: 10,

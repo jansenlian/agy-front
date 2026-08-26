@@ -193,7 +193,7 @@ async function doSymEncrypt() {
   symLoading.value = true;
   try {
     const res = await encryptSymmetricApi(symForm);
-    symResult.value = (res as any)?.data || (res as any);
+    symResult.value = res;
     ElMessage.success('后端对称加密成功！');
   } catch (e: any) {
     ElMessage.error(e.message || '加密失败');
@@ -210,7 +210,7 @@ async function doSymDecrypt() {
   symLoading.value = true;
   try {
     const res = await decryptSymmetricApi(symForm);
-    symResult.value = (res as any)?.data || (res as any);
+    symResult.value = res;
     ElMessage.success('后端对称解密成功！');
   } catch (e: any) {
     ElMessage.error(e.message || '解密失败，请检查密钥与密文');
@@ -232,8 +232,7 @@ async function doHashCalc() {
   hashLoading.value = true;
   try {
     const res = await calculateHashApi(hashForm);
-    const data = (res as any)?.data || (res as any);
-    Object.assign(hashResult, data);
+    Object.assign(hashResult, res);
   } catch (e: any) {
     console.error('哈希计算失败', e);
   } finally {
@@ -245,9 +244,8 @@ async function fetchKeyPair() {
   asymLoading.value = true;
   try {
     const res = await generateKeyPairApi(asymForm.algorithm);
-    const data = (res as any)?.data || (res as any);
-    asymForm.publicKey = data.publicKey;
-    asymForm.privateKey = data.privateKey;
+    asymForm.publicKey = res.publicKey;
+    asymForm.privateKey = res.privateKey;
     ElMessage.success(`生成全新 ${asymForm.algorithm} 密钥对成功！`);
   } catch (e: any) {
     ElMessage.error(e.message || '密钥对生成失败');
@@ -264,7 +262,7 @@ async function doAsymEncrypt() {
   asymLoading.value = true;
   try {
     const res = await encryptAsymmetricApi(asymForm);
-    asymResult.value = (res as any)?.data || (res as any);
+    asymResult.value = res;
     ElMessage.success('非对称加密成功！');
   } catch (e: any) {
     ElMessage.error(e.message || '非对称加密失败');
@@ -281,7 +279,7 @@ async function doAsymDecrypt() {
   asymLoading.value = true;
   try {
     const res = await decryptAsymmetricApi(asymForm);
-    asymResult.value = (res as any)?.data || (res as any);
+    asymResult.value = res;
     ElMessage.success('非对称解密成功！');
   } catch (e: any) {
     ElMessage.error(e.message || '非对称解密失败，请检查私钥');
@@ -298,9 +296,8 @@ async function doAsymSign() {
   asymLoading.value = true;
   try {
     const res = await signApi(asymForm);
-    const signature = (res as any)?.data || (res as any);
-    asymForm.signature = signature;
-    asymResult.value = `[签名值 Signature]:\n${signature}`;
+    asymForm.signature = res;
+    asymResult.value = `[签名值 Signature]:\n${res}`;
     ElMessage.success('数字签名生成成功！');
   } catch (e: any) {
     ElMessage.error(e.message || '签名失败');
@@ -316,8 +313,7 @@ async function doAsymVerify() {
   }
   asymLoading.value = true;
   try {
-    const res = await verifyApi(asymForm);
-    const passed = (res as any)?.data ?? (res as any);
+    const passed = await verifyApi(asymForm);
     if (passed) {
       asymResult.value = '✅ 验签通过 (Signature Valid): 签名真实合法且数据未被篡改！';
       ElMessage.success('签名校验通过！');
