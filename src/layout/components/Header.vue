@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { ElMessage, type FormInstance } from 'element-plus';
 import { useAppStore } from '@/stores/app';
 import { useUserStore } from '@/stores/user';
@@ -61,7 +61,6 @@ import { updateUserPasswordApi } from '@/api/modules/userApi';
 import { encryptPassword } from '@/utils/rsa';
 
 const route = useRoute();
-const router = useRouter();
 const appStore = useAppStore();
 const userStore = useUserStore();
 
