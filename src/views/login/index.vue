@@ -83,37 +83,58 @@ const rules = {
 };
 
 /* =========================================================================
- * Antigravity 反重力星空引力场物理仿真引擎 (Canvas 2D Particle Engine)
+ * Google Antigravity (AGY) 官方级物理引力场仿真引擎 (True Gravitational Engine)
  * ========================================================================= */
 
 interface StarParticle {
   x: number;
   y: number;
+  z: number; // 3D 深度视差 [0.2, 1.5]
   vx: number;
   vy: number;
-  radius: number;
+  baseRadius: number;
   baseAlpha: number;
   alpha: number;
   pulseSpeed: number;
   pulseAngle: number;
   color: string;
   glowColor: string;
+  mass: number; // 质量影响受力加速度
+}
+
+interface Shockwave {
+  x: number;
+  y: number;
+  radius: number;
+  maxRadius: number;
+  speed: number;
+  strength: number;
+  alpha: number;
 }
 
 let animationFrameId: number | null = null;
 const mouse = {
   x: -9999,
   y: -9999,
+  lastX: -9999,
+  lastY: -9999,
+  vx: 0,
+  vy: 0,
   isActive: false,
-  targetRadius: 240,
+  gravityRadius: 320, // 引力影响范围
+  coreRadius: 28,     // 核心事件视界斥力半径(形成吸积盘光环)
 };
 
-const STAR_COLORS = [
-  { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.8)' },
-  { color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.8)' },
-  { color: '#818cf8', glow: 'rgba(129, 140, 248, 0.8)' },
-  { color: '#c084fc', glow: 'rgba(192, 132, 252, 0.8)' },
-  { color: '#34d399', glow: 'rgba(52, 211, 153, 0.8)' },
+const shockwaves: Shockwave[] = [];
+
+// AGY 标志性星空深空色系
+const STAR_PALETTES = [
+  { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.9)' },
+  { color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.85)' },
+  { color: '#60a5fa', glow: 'rgba(96, 165, 250, 0.85)' },
+  { color: '#818cf8', glow: 'rgba(129, 140, 248, 0.85)' },
+  { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.8)' },
+  { color: '#2dd4bf', glow: 'rgba(45, 212, 191, 0.8)' },
 ];
 
 function initAntigravityCanvas() {
@@ -126,26 +147,30 @@ function initAntigravityCanvas() {
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);
 
-  const particleCount = Math.min(Math.floor((width * height) / 7500), 220);
+  // 高密度星尘群: 根据屏幕自适应 600 ~ 1000 颗
+  const particleCount = Math.min(Math.max(Math.floor((width * height) / 2200), 550), 1000);
   const particles: StarParticle[] = [];
 
   for (let i = 0; i < particleCount; i++) {
-    const palette = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
-    const size = Math.random() * 2.2 + 0.8;
-    const baseAlpha = Math.random() * 0.6 + 0.3;
+    const palette = STAR_PALETTES[Math.floor(Math.random() * STAR_PALETTES.length)];
+    const z = Math.random() * 1.3 + 0.3; // 深度
+    const baseRadius = (Math.random() * 1.6 + 0.4) * z;
+    const baseAlpha = (Math.random() * 0.55 + 0.35) * Math.min(1, z);
 
     particles.push({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      radius: size,
+      z,
+      vx: (Math.random() - 0.5) * 0.3 * z,
+      vy: (Math.random() - 0.5) * 0.3 * z,
+      baseRadius,
       baseAlpha,
       alpha: baseAlpha,
-      pulseSpeed: Math.random() * 0.03 + 0.01,
+      pulseSpeed: Math.random() * 0.025 + 0.008,
       pulseAngle: Math.random() * Math.PI * 2,
       color: palette.color,
       glowColor: palette.glow,
+      mass: Math.random() * 0.8 + 0.6,
     });
   }
 
@@ -156,8 +181,14 @@ function initAntigravityCanvas() {
   }
 
   function handleMouseMove(e: MouseEvent) {
+    if (mouse.lastX !== -9999) {
+      mouse.vx = (e.clientX - mouse.lastX) * 0.4;
+      mouse.vy = (e.clientY - mouse.lastY) * 0.4;
+    }
     mouse.x = e.clientX;
     mouse.y = e.clientY;
+    mouse.lastX = e.clientX;
+    mouse.lastY = e.clientY;
     mouse.isActive = true;
   }
 
@@ -165,12 +196,36 @@ function initAntigravityCanvas() {
     mouse.isActive = false;
     mouse.x = -9999;
     mouse.y = -9999;
+    mouse.lastX = -9999;
+    mouse.lastY = -9999;
+    mouse.vx = 0;
+    mouse.vy = 0;
+  }
+
+  function handleClick(e: MouseEvent) {
+    // 触发 AGY 超新星引力激波
+    shockwaves.push({
+      x: e.clientX,
+      y: e.clientY,
+      radius: 5,
+      maxRadius: 360,
+      speed: 12,
+      strength: 22,
+      alpha: 0.9,
+    });
   }
 
   function handleTouchMove(e: TouchEvent) {
     if (e.touches.length > 0) {
-      mouse.x = e.touches[0].clientX;
-      mouse.y = e.touches[0].clientY;
+      const touch = e.touches[0];
+      if (mouse.lastX !== -9999) {
+        mouse.vx = (touch.clientX - mouse.lastX) * 0.4;
+        mouse.vy = (touch.clientY - mouse.lastY) * 0.4;
+      }
+      mouse.x = touch.clientX;
+      mouse.y = touch.clientY;
+      mouse.lastX = touch.clientX;
+      mouse.lastY = touch.clientY;
       mouse.isActive = true;
     }
   }
@@ -182,116 +237,191 @@ function initAntigravityCanvas() {
   window.addEventListener('resize', handleResize);
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mouseleave', handleMouseLeave);
+  window.addEventListener('click', handleClick);
   window.addEventListener('touchmove', handleTouchMove, { passive: true });
   window.addEventListener('touchend', handleTouchEnd);
 
   function render() {
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, width, height);
+    // 1. 半透明背景涂刷,生成丝滑运动残影 (Organic Motion Trails)
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(5, 8, 17, 0.28)';
+    ctx.fillRect(0, 0, width, height);
 
-    // 1. 如果鼠标在屏幕上,绘制微弱的引力场光晕与引力涟漪
+    // 鼠标速度衰减
+    mouse.vx *= 0.88;
+    mouse.vy *= 0.88;
+
+    // 2. 引力波激波演算与渲染
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+      const sw = shockwaves[i];
+      sw.radius += sw.speed;
+      sw.alpha *= 0.94;
+
+      if (sw.alpha <= 0.01 || sw.radius >= sw.maxRadius) {
+        shockwaves.splice(i, 1);
+        continue;
+      }
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(56, 189, 248, ${sw.alpha * 0.7})`;
+      ctx.lineWidth = 2.5;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#38bdf8';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 3. 启用高能增色叠加 (Additive Blending - 核心高能光子融合)
+    ctx.globalCompositeOperation = 'lighter';
+
+    // 鼠标引力核心微弱星云光晕
     if (mouse.isActive) {
-      const gradient = ctx.createRadialGradient(
+      const aura = ctx.createRadialGradient(
         mouse.x,
         mouse.y,
         0,
         mouse.x,
         mouse.y,
-        mouse.targetRadius
+        mouse.gravityRadius * 0.8
       );
-      gradient.addColorStop(0, 'rgba(56, 189, 248, 0.15)');
-      gradient.addColorStop(0.5, 'rgba(129, 140, 248, 0.05)');
-      gradient.addColorStop(1, 'rgba(10, 15, 30, 0)');
+      aura.addColorStop(0, 'rgba(56, 189, 248, 0.18)');
+      aura.addColorStop(0.3, 'rgba(129, 140, 248, 0.08)');
+      aura.addColorStop(0.7, 'rgba(168, 85, 247, 0.03)');
+      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
       ctx.save();
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = aura;
       ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, mouse.targetRadius, 0, Math.PI * 2);
+      ctx.arc(mouse.x, mouse.y, mouse.gravityRadius * 0.8, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // 2. 物理受力计算与粒子移动
+    // 4. 粒子天体引力动力学物理循环
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
 
       // 自然微光呼吸闪烁
       p.pulseAngle += p.pulseSpeed;
-      p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.2;
+      p.alpha = p.baseAlpha + Math.sin(p.pulseAngle) * 0.18;
 
-      // 引力场物理演算
+      // 激波排斥力作用
+      for (let s = 0; s < shockwaves.length; s++) {
+        const sw = shockwaves[s];
+        const sdx = p.x - sw.x;
+        const sdy = p.y - sw.y;
+        const sDist = Math.hypot(sdx, sdy);
+        const diff = Math.abs(sDist - sw.radius);
+
+        if (diff < 40 && sDist > 1) {
+          const force = (1 - diff / 40) * sw.strength * sw.alpha;
+          p.vx += (sdx / sDist) * force;
+          p.vy += (sdy / sDist) * force;
+        }
+      }
+
+      // 鼠标天体万有引力与吸积盘切向角动量
       if (mouse.isActive) {
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.hypot(dx, dy);
 
-        if (dist < mouse.targetRadius && dist > 1) {
-          const force = (1 - dist / mouse.targetRadius) * 0.8;
-          const angle = Math.atan2(dy, dx);
+        if (dist < mouse.gravityRadius && dist > 0.1) {
+          const normX = dx / dist;
+          const normY = dy / dist;
 
-          // 向心引力吸附加速度
-          p.vx += Math.cos(angle) * force * 0.45;
-          p.vy += Math.sin(angle) * force * 0.45;
+          // 核心事件视界防坍缩排斥力 (形成围绕鼠标旋转的高能吸积盘光环)
+          if (dist < mouse.coreRadius) {
+            const repelRatio = (1 - dist / mouse.coreRadius);
+            const repelForce = repelRatio * 2.8;
+            p.vx -= normX * repelForce;
+            p.vy -= normY * repelForce;
 
-          // 核心反重力切向自旋 (Vortex Orbiting: 粒子靠近时围绕鼠标做星轨旋转)
-          p.vx += -Math.sin(angle) * force * 0.35;
-          p.vy += Math.cos(angle) * force * 0.35;
+            // 核心强自旋角速度
+            p.vx += -normY * 4.2;
+            p.vy += normX * 4.2;
+            p.alpha = 1;
+          } else {
+            // 平滑引力衰减模型 F ~ G / (r * factor + 1)
+            const gravityRatio = Math.pow((mouse.gravityRadius - dist) / mouse.gravityRadius, 1.6);
+            const attractForce = gravityRatio * 0.9 * p.mass;
 
-          // 靠近引力中心时粒子亮度增强
-          p.alpha = Math.min(1, p.alpha + force * 0.5);
+            // 向心吸引力
+            p.vx += normX * attractForce;
+            p.vy += normY * attractForce;
+
+            // 切向自旋角动量 (Keplerian Orbital Angular Velocity: 越近转得越快)
+            const orbitRatio = Math.pow((mouse.gravityRadius - dist) / mouse.gravityRadius, 1.2);
+            const orbitSpeed = orbitRatio * 1.6 * p.z;
+            p.vx += -normY * orbitSpeed;
+            p.vy += normX * orbitSpeed;
+
+            // 鼠标挥动风暴动量传递 (Mouse Velocity Wake)
+            if (Math.abs(mouse.vx) > 0.5 || Math.abs(mouse.vy) > 0.5) {
+              const wakeFactor = gravityRatio * 0.25;
+              p.vx += mouse.vx * wakeFactor;
+              p.vy += mouse.vy * wakeFactor;
+            }
+
+            p.alpha = Math.min(1, p.baseAlpha + gravityRatio * 0.65);
+          }
         }
       }
 
-      // 摩擦阻尼与位移更新
-      p.vx *= 0.95;
-      p.vy *= 0.95;
+      // 摩擦阻尼与空间平滑
+      p.vx *= 0.94;
+      p.vy *= 0.94;
 
-      // 补充微弱随机漂移力,确保脱离引力后维持宇宙失重漂浮
-      p.vx += (Math.random() - 0.5) * 0.04;
-      p.vy += (Math.random() - 0.5) * 0.04;
+      // 宇宙微弱失重布朗漂移
+      p.vx += (Math.random() - 0.5) * 0.05 * p.z;
+      p.vy += (Math.random() - 0.5) * 0.05 * p.z;
 
       p.x += p.vx;
       p.y += p.vy;
 
-      // 边界循环回弹穿透
-      if (p.x < 0) p.x = width;
-      if (p.x > width) p.x = 0;
-      if (p.y < 0) p.y = height;
-      if (p.y > height) p.y = 0;
+      // 环绕边界穿透
+      if (p.x < -20) p.x = width + 20;
+      if (p.x > width + 20) p.x = -20;
+      if (p.y < -20) p.y = height + 20;
+      if (p.y > height + 20) p.y = -20;
 
-      // 绘制单个星星与发光阴影
+      // 5. 核心渲染: 速度矢量流光拉伸 (Velocity Vector Streaks)
+      const speed = Math.hypot(p.vx, p.vy);
+      const isFast = speed > 1.2;
+
       ctx.save();
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha));
-      ctx.shadowBlur = p.radius * 4;
-      ctx.shadowColor = p.glowColor;
-      ctx.fill();
+      if (isFast) {
+        // 高速流星光轨拉伸
+        const streakLen = Math.min(speed * 3.5, 30);
+        const tailX = p.x - (p.vx / speed) * streakLen;
+        const tailY = p.y - (p.vy / speed) * streakLen;
+
+        ctx.strokeStyle = p.glowColor;
+        ctx.lineWidth = Math.max(0.8, p.baseRadius * 0.85);
+        ctx.globalAlpha = Math.min(1, p.alpha);
+        ctx.shadowBlur = Math.min(speed * 2, 16);
+        ctx.shadowColor = p.color;
+
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      } else {
+        // 低速微光星体
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.baseRadius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha));
+        ctx.shadowBlur = p.baseRadius * 4;
+        ctx.shadowColor = p.glowColor;
+        ctx.fill();
+      }
       ctx.restore();
     }
-
-    // 3. 星图微光星座连线 (Constellation Links)
-    ctx.save();
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const p1 = particles[i];
-        const p2 = particles[j];
-        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-
-        if (dist < 85) {
-          const lineAlpha = (1 - dist / 85) * 0.22 * Math.min(p1.alpha, p2.alpha);
-          ctx.strokeStyle = `rgba(129, 140, 248, ${lineAlpha})`;
-          ctx.lineWidth = 0.6;
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
-      }
-    }
-    ctx.restore();
 
     animationFrameId = requestAnimationFrame(render);
   }
@@ -305,6 +435,7 @@ function initAntigravityCanvas() {
     window.removeEventListener('resize', handleResize);
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseleave', handleMouseLeave);
+    window.removeEventListener('click', handleClick);
     window.removeEventListener('touchmove', handleTouchMove);
     window.removeEventListener('touchend', handleTouchEnd);
   };
