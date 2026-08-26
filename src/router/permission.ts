@@ -55,9 +55,9 @@ export function setupPermissionGuard(router: Router) {
           next({ ...to, replace: true });
           return;
         } catch (error) {
-          console.error('加载动态路由异常', error);
-          isDynamicRoutesAdded = true;
-          next();
+          console.error('加载动态路由异常,重置凭证并重定向至登录页:', error);
+          userStore.resetToken();
+          next(`/login?redirect=${encodeURIComponent(to.fullPath)}`);
           return;
         }
       }

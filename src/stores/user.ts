@@ -42,7 +42,6 @@ export const useUserStore = defineStore(
       if (res.refreshToken) {
         refreshToken.value = res.refreshToken;
       }
-      await loadPermissions();
       return token.value;
     }
 
