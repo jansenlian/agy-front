@@ -1,5 +1,4 @@
 import type { RouteRecordRaw } from 'vue-router';
-import MainLayout from '@/layout/MainLayout.vue';
 
 export const constantRoutes: RouteRecordRaw[] = [
   {
@@ -11,7 +10,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Layout',
-    component: MainLayout,
+    component: () => import('@/layout/MainLayout.vue'),
     redirect: '/dashboard',
     children: [
       {
