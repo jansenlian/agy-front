@@ -82,6 +82,7 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { useUserStore } from '@/stores/user';
 
 interface ChatMessage {
   role: 'user' | 'bot';
@@ -163,8 +164,22 @@ async function handleSend() {
   scrollToBottom();
 
   try {
-    const url = `/api/agent/chat/stream?message=${encodeURIComponent(query)}&memoryId=${encodeURIComponent(sessionId.value)}`;
-    const response = await fetch(url);
+    const userStore = useUserStore();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (userStore.token) {
+      headers['Authorization'] = `Bearer ${userStore.token}`;
+    }
+
+    const response = await fetch('/api/agent/chat/stream', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        message: query,
+        memoryId: sessionId.value,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error(`服务响应异常: HTTP ${response.status}`);
